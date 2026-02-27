@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/xpac.iml" filepath="$PROJECT_DIR$/.idea/xpac.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/spac.iml" filepath="$PROJECT_DIR$/.idea/spac.iml" />
     </modules>
   </component>
 </project>
