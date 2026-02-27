@@ -3,5 +3,5 @@
 version = 4
 
 [[package]]
-name = "spac"
+name = "spiv"
 version = "0.1.0"
