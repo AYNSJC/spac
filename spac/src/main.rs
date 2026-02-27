@@ -20,8 +20,12 @@ fn main() {
                 println!("Usage: -f <search_term>");
             }
         }
-
-        if input == "-q" {
+        else if input.contains("-c") {
+            if cfg!(target_os = "windows") {
+                let output = Command::new("cmd").args(["/C", "cls"]).status().unwrap();
+            }
+        }
+        else if input == "-q" {
             running = false;
         }
     }
