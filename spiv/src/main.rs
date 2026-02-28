@@ -1,4 +1,3 @@
-use std::env::args;
 use std::io::{self, Write};
 use std::process::Command;
 
@@ -17,6 +16,7 @@ fn main() {
 
         let flag = parts.next();
         let arg = parts.next();
+        let extra = parts.next();
 
         match flag {
             Some("-f") => {
@@ -27,37 +27,44 @@ fn main() {
                     println!("Usage: -f <search_term>");
                 }
             }
-
             Some("-i") => {
                 if let Some(package) = arg {
-                    install_package(package);
+                    install_package(package, extra);
                 }
                 else {
-                    println!("Usage: -i <package_name>");
+                    println!("Usage: -i <package_name> [/l<path>]");
                 }
             }
-
             Some("-u") => {
-                update_packages(arg);
+                update_packages(arg, extra);
             }
-
             Some("-c") => {
                 clear_screen();
             }
-
             Some("-h") => {
                 print_help();
             }
-
             Some("-q") => {
                 running = false;
             }
-
             Some(_) | None => {
                 println!("Unknown command. Use -h for help.");
             }
         }
     }
+}
+
+fn get_location(token: Option<&str>) -> Option<String> {
+    if let Some(t) = token {
+        if t == "/l" {
+            let current = std::env::current_dir().expect("Failed to get current directory");
+            return Some(current.to_string_lossy().into_owned());
+        }
+        else if t.starts_with("/l") {
+            return Some(t[2..].to_string());
+        }
+    }
+    None
 }
 
 fn search_package(query: &str) {
@@ -80,9 +87,16 @@ fn search_package(query: &str) {
     }
 }
 
-fn install_package(package: &str) {
+fn install_package(package: &str, extra: Option<&str>) {
+    let location = get_location(extra);
+
     if cfg!(target_os = "windows") {
-        Command::new("winget").args(["install", package]).status().expect("failed to execute winget");
+        if let Some(loc) = &location {
+            Command::new("winget").args(["install", package, "--location", loc]).status().expect("failed to execute winget");
+        }
+        else {
+            Command::new("winget").args(["install", package]).status().expect("failed to execute winget");
+        }
     }
     else if cfg!(target_os = "linux") {
         if command_exists("apt") {
@@ -100,32 +114,39 @@ fn install_package(package: &str) {
     }
 }
 
-fn update_packages(arg: Option<&str>) {
+fn update_packages(arg: Option<&str>, extra: Option<&str>) {
+    if let Some(a) = arg {
+        if a == "/l" || a.starts_with("/l") {
+            let location = get_location(arg);
+            update_all(location.as_deref());
+            return;
+        }
+    }
+
+    let location = get_location(extra);
+
     match arg {
         Some("/a") => {
             if cfg!(target_os = "windows") {
-                Command::new("winget").args(["upgrade", "--all"]).status().expect("failed to execute winget");
-            }
-            else if cfg!(target_os = "linux") {
-                if command_exists("apt") {
-                    Command::new("sudo").args(["apt", "update"]).status().expect("failed to update apt");
-                    Command::new("sudo").args(["apt", "upgrade", "-y"]).status().expect("failed to upgrade apt");
-                }
-                else if command_exists("dnf") {
-                    Command::new("sudo").args(["dnf", "upgrade", "-y"]).status().expect("failed to execute dnf");
-                }
-                else if command_exists("pacman") {
-                    Command::new("sudo").args(["pacman", "-Syu", "--noconfirm"]).status().expect("failed to execute pacman");
+                if let Some(loc) = &location {
+                    Command::new("winget").args(["upgrade", "--all", "--location", loc]).status().expect("failed to execute winget");
                 }
                 else {
-                    println!("No supported package manager found.");
+                    Command::new("winget").args(["upgrade", "--all"]).status().expect("failed to execute winget");
                 }
             }
+            else if cfg!(target_os = "linux") {
+                update_all_linux();
+            }
         }
-
         Some(pkg) => {
             if cfg!(target_os = "windows") {
-                Command::new("winget").args(["upgrade", pkg]).status().expect("failed to execute winget");
+                if let Some(loc) = &location {
+                    Command::new("winget").args(["upgrade", pkg, "--location", loc]).status().expect("failed to execute winget");
+                }
+                else {
+                    Command::new("winget").args(["upgrade", pkg]).status().expect("failed to execute winget");
+                }
             }
             else if cfg!(target_os = "linux") {
                 if command_exists("apt") {
@@ -142,10 +163,23 @@ fn update_packages(arg: Option<&str>) {
                 }
             }
         }
-
         None => {
-            println!("Usage: -u /a  (all)  OR  -u <package>");
+            println!("Usage: -u /a [/l<path>]  (all)  OR  -u <package> [/l<path>]");
         }
+    }
+}
+
+fn update_all(location: Option<&str>) {
+    if cfg!(target_os = "windows") {
+        if let Some(loc) = location {
+            Command::new("winget").args(["upgrade", "--all", "--location", loc]).status().expect("failed to execute winget");
+        }
+        else {
+            Command::new("winget").args(["upgrade", "--all"]).status().expect("failed to execute winget");
+        }
+    }
+    else if cfg!(target_os = "linux") {
+        update_all_linux();
     }
 }
 
@@ -161,14 +195,32 @@ fn clear_screen() {
 fn print_help() {
     println!("Welcome to spiv");
     println!("Commands:");
-    println!("-f <search_term>          | Search for a package");
-    println!("-i <package_name>         | Install a package");
-    println!("-u <package_name>         | Updates all packages");
-    println!("-c                        | Clear screen");
-    println!("-h                        | Show help");
-    println!("-q                        | Quit");
+    println!("-f <search_term>               | Search for a package");
+    println!("-i <package_name> [/l<path>]   | Install a package");
+    println!("-u /a [/l<path>]               | Update all packages");
+    println!("-u <package_name> [/l<path>]   | Update a specific package");
+    println!("-u /l                          | Update all in current location");
+    println!("-c                             | Clear screen");
+    println!("-h                             | Show help");
+    println!("-q                             | Quit");
 }
 
 fn command_exists(cmd: &str) -> bool {
     Command::new("which").arg(cmd).output().map(|o| o.status.success()).unwrap_or(false)
+}
+
+fn update_all_linux() {
+    if command_exists("apt") {
+        Command::new("sudo").args(["apt", "update"]).status().expect("failed to update apt");
+        Command::new("sudo").args(["apt", "upgrade", "-y"]).status().expect("failed to upgrade apt");
+    }
+    else if command_exists("dnf") {
+        Command::new("sudo").args(["dnf", "upgrade", "-y"]).status().expect("failed to execute dnf");
+    }
+    else if command_exists("pacman") {
+        Command::new("sudo").args(["pacman", "-Syu", "--noconfirm"]).status().expect("failed to execute pacman");
+    }
+    else {
+        println!("No supported package manager found.");
+    }
 }

@@ -48,6 +48,7 @@
     "kotlin-language-version-configured": "true",
     "org.rust.cargo.project.model.PROJECT_DISCOVERY": "true",
     "org.rust.first.attach.projects": "true",
+    "run.code.analysis.last.selected.profile": "pProject Default",
     "settings.editor.selected.configurable": "preferences.lookFeel",
     "vue.rearranger.settings.migration": "true"
   }
@@ -111,7 +112,7 @@
       <workItem from="1772204249362" duration="1519000" />
       <workItem from="1772208035159" duration="2235000" />
       <workItem from="1772250982388" duration="262000" />
-      <workItem from="1772269655818" duration="3801000" />
+      <workItem from="1772269655818" duration="6098000" />
     </task>
     <servers />
   </component>
