@@ -1,3 +1,4 @@
+use std::env::args;
 use std::io::{self, Write};
 use std::process::Command;
 
@@ -100,24 +101,50 @@ fn install_package(package: &str) {
 }
 
 fn update_packages(arg: Option<&str>) {
-    if arg == Some("/u") {
-        if cfg!(target_os = "windows") {
-            Command::new("winget").args(["upgrade", "--all"]).status().expect("failed to execute winget");
+    match arg {
+        Some("/a") => {
+            if cfg!(target_os = "windows") {
+                Command::new("winget").args(["upgrade", "--all"]).status().expect("failed to execute winget");
+            }
+            else if cfg!(target_os = "linux") {
+                if command_exists("apt") {
+                    Command::new("sudo").args(["apt", "update"]).status().expect("failed to update apt");
+                    Command::new("sudo").args(["apt", "upgrade", "-y"]).status().expect("failed to upgrade apt");
+                }
+                else if command_exists("dnf") {
+                    Command::new("sudo").args(["dnf", "upgrade", "-y"]).status().expect("failed to execute dnf");
+                }
+                else if command_exists("pacman") {
+                    Command::new("sudo").args(["pacman", "-Syu", "--noconfirm"]).status().expect("failed to execute pacman");
+                }
+                else {
+                    println!("No supported package manager found.");
+                }
+            }
         }
-        else if cfg!(target_os = "linux") {
-            if command_exists("apt") {
-                Command::new("sudo").args(["apt", "update"]).status().expect("failed to update apt");
-                Command::new("sudo").args(["apt", "upgrade", "-y"]).status().expect("failed to upgrade apt");
+
+        Some(pkg) => {
+            if cfg!(target_os = "windows") {
+                Command::new("winget").args(["upgrade", pkg]).status().expect("failed to execute winget");
             }
-            else if command_exists("dnf") {
-                Command::new("sudo").args(["dnf", "upgrade", "-y"]).status().expect("failed to execute dnf");
+            else if cfg!(target_os = "linux") {
+                if command_exists("apt") {
+                    Command::new("sudo").args(["apt", "install", "--only-upgrade", pkg]).status().expect("failed to upgrade apt package");
+                }
+                else if command_exists("dnf") {
+                    Command::new("sudo").args(["dnf", "upgrade", "-y", pkg]).status().expect("failed to upgrade dnf package");
+                }
+                else if command_exists("pacman") {
+                    Command::new("sudo").args(["pacman", "-S", pkg, "--noconfirm"]).status().expect("failed to upgrade pacman package");
+                }
+                else {
+                    println!("No supported package manager found.");
+                }
             }
-            else if command_exists("pacman") {
-                Command::new("sudo").args(["pacman", "-Syu", "--noconfirm"]).status().expect("failed to execute pacman");
-            }
-            else {
-                println!("No supported package manager found.");
-            }
+        }
+
+        None => {
+            println!("Usage: -u /a  (all)  OR  -u <package>");
         }
     }
 }
@@ -134,12 +161,12 @@ fn clear_screen() {
 fn print_help() {
     println!("Welcome to spiv");
     println!("Commands:");
-    println!("-f <search_term>      Search for a package");
-    println!("-i <package_name>     Install a package");
-    println!("-u all                Updates all packages");
-    println!("-c                    Clear screen");
-    println!("-h                    Show help");
-    println!("-q                    Quit");
+    println!("-f <search_term>          | Search for a package");
+    println!("-i <package_name>         | Install a package");
+    println!("-u <package_name>         | Updates all packages");
+    println!("-c                        | Clear screen");
+    println!("-h                        | Show help");
+    println!("-q                        | Quit");
 }
 
 fn command_exists(cmd: &str) -> bool {
