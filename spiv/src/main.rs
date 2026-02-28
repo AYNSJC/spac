@@ -5,81 +5,141 @@ fn main() {
     let mut running = true;
 
     while running {
-        let mut input = String::new();
-
-        print!(">");
-
+        print!("> ");
         io::stdout().flush().unwrap();
 
+        let mut input = String::new();
         io::stdin().read_line(&mut input).expect("Failed to read line");
-        let input = input.trim();
 
-        if input.contains("-f") {
-            if let Some((_flag, query)) = input.split_once(' ') {
-                if cfg!(target_os = "windows") {
-                    Command::new("winget").args(["search", query]).status().expect("failed to execute process");
+        let input = input.trim();
+        let mut parts = input.split_whitespace();
+
+        let flag = parts.next();
+        let arg = parts.next();
+
+        match flag {
+            Some("-f") => {
+                if let Some(query) = arg {
+                    search_package(query);
                 }
-                else if cfg!(target_os = "linux") {
-                    if command_exists("apt") {
-                        Command::new("apt").args(["search", query]).status().expect("failed to execute apt");
-                    }
-                    else if command_exists("dnf") {
-                        Command::new("dnf").args(["search", query]).status().expect("failed to execute dnf");
-                    }
-                    else if command_exists("pacman") {
-                        Command::new("pacman").args(["-Ss", query]).status().expect("failed to execute pacman");
-                    }
-                    else {
-                        println!("No supported package manager found.");
-                    }
+                else {
+                    println!("Usage: -f <search_term>");
                 }
             }
-            else {
-                println!("Usage: -f <search_term>");
-            }
-        }
-        else if input.contains("-i") {
-            if let Some((_flag, package)) = input.split_once(' ') {
-                if cfg!(target_os = "windows") {
-                    Command::new("winget").args(["install", package]).status().expect("failed to execute process");
+
+            Some("-i") => {
+                if let Some(package) = arg {
+                    install_package(package);
                 }
-                else if cfg!(target_os = "linux") {
-                    if command_exists("apt") {
-                        Command::new("sudo").args(["apt", "install", "-y", package]).status().expect("failed to execute apt");
-                    }
-                    else if command_exists("dnf") {
-                        Command::new("sudo").args(["dnf", "install", "-y", package]).status().expect("failed to execute dnf");
-                    }
-                    else if command_exists("pacman") {
-                        Command::new("sudo").args(["pacman", "-S", "--noconfirm", package]).status().expect("failed to execute pacman");
-                    }
-                    else {
-                        println!("No supported package manager found.");
-                    }
+                else {
+                    println!("Usage: -i <package_name>");
                 }
             }
-        }
-        else if input.contains("-c") {
-            if cfg!(target_os = "windows") {
-                Command::new("cmd").args(["/C", "cls"]).status().unwrap();
+
+            Some("-u") => {
+                update_packages(arg);
             }
-            else {
-                Command::new("sh").args(["-c", "clear"]).status().unwrap();
+
+            Some("-c") => {
+                clear_screen();
             }
-        }
-        else if input.contains("-h") {
-            println!("Welcome to spiv");
-            println!("Here are a few common commands");
-            println!("spiv -f <search_term>  searches for the given package");
-            println!("spiv -i <package_name / package_id>  installs the given package");
-            println!("spiv -h  Gives common commands");
-            println!("spiv -c  Clears screen");
-            println!("spiv -q  quits the program");
-        }
-        else if input == "-q" {
-            running = false;
+
+            Some("-h") => {
+                print_help();
+            }
+
+            Some("-q") => {
+                running = false;
+            }
+
+            Some(_) | None => {
+                println!("Unknown command. Use -h for help.");
+            }
         }
     }
+}
+
+fn search_package(query: &str) {
+    if cfg!(target_os = "windows") {
+        Command::new("winget").args(["search", query]).status().expect("failed to execute winget");
+    }
+    else if cfg!(target_os = "linux") {
+        if command_exists("apt") {
+            Command::new("apt").args(["search", query]).status().expect("failed to execute apt");
+        }
+        else if command_exists("dnf") {
+            Command::new("dnf").args(["search", query]).status().expect("failed to execute dnf");
+        }
+        else if command_exists("pacman") {
+            Command::new("pacman").args(["-Ss", query]).status().expect("failed to execute pacman");
+        }
+        else {
+            println!("No supported package manager found.");
+        }
+    }
+}
+
+fn install_package(package: &str) {
+    if cfg!(target_os = "windows") {
+        Command::new("winget").args(["install", package]).status().expect("failed to execute winget");
+    }
+    else if cfg!(target_os = "linux") {
+        if command_exists("apt") {
+            Command::new("sudo").args(["apt", "install", "-y", package]).status().expect("failed to execute apt");
+        }
+        else if command_exists("dnf") {
+            Command::new("sudo").args(["dnf", "install", "-y", package]).status().expect("failed to execute dnf");
+        }
+        else if command_exists("pacman") {
+            Command::new("sudo").args(["pacman", "-S", "--noconfirm", package]).status().expect("failed to execute pacman");
+        }
+        else {
+            println!("No supported package manager found.");
+        }
+    }
+}
+
+fn update_packages(arg: Option<&str>) {
+    if arg == Some("/u") {
+        if cfg!(target_os = "windows") {
+            Command::new("winget").args(["upgrade", "--all"]).status().expect("failed to execute winget");
+        }
+        else if cfg!(target_os = "linux") {
+            if command_exists("apt") {
+                Command::new("sudo").args(["apt", "update"]).status().expect("failed to update apt");
+                Command::new("sudo").args(["apt", "upgrade", "-y"]).status().expect("failed to upgrade apt");
+            }
+            else if command_exists("dnf") {
+                Command::new("sudo").args(["dnf", "upgrade", "-y"]).status().expect("failed to execute dnf");
+            }
+            else if command_exists("pacman") {
+                Command::new("sudo").args(["pacman", "-Syu", "--noconfirm"]).status().expect("failed to execute pacman");
+            }
+            else {
+                println!("No supported package manager found.");
+            }
+        }
+    }
+}
+
+fn clear_screen() {
+    if cfg!(target_os = "windows") {
+        Command::new("cmd").args(["/C", "cls"]).status().unwrap();
+    }
+    else {
+        Command::new("clear").status().unwrap();
+    }
+}
+
+fn print_help() {
+    println!("Welcome to spiv");
+    println!("Commands:");
+    println!("-f <search_term>      Search for a package");
+    println!("-i <package_name>     Install a package");
+    println!("-u all                Updates all packages");
+    println!("-c                    Clear screen");
+    println!("-h                    Show help");
+    println!("-q                    Quit");
 }
 
 fn command_exists(cmd: &str) -> bool {
