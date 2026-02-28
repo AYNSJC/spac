@@ -71,6 +71,7 @@ fn main() {
             println!("Welcome to spiv");
             println!("Here are a few common commands");
             println!("spiv -f <search_term>  searches for the given package");
+            println!("spiv -i <package_name / package_id>  installs the given package");
             println!("spiv -h  Gives common commands");
             println!("spiv -c  Clears screen");
             println!("spiv -q  quits the program");
