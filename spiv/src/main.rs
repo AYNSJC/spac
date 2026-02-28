@@ -1,55 +1,41 @@
-use std::io::{self, Write};
+use std::env;
 use std::process::Command;
 
 fn main() {
-    let mut running = true;
+    let mut args = env::args().skip(1);
 
-    while running {
-        print!("> ");
-        io::stdout().flush().unwrap();
+    let flag = args.next();
+    let arg = args.next();
+    let extra = args.next();
 
-        let mut input = String::new();
-        io::stdin().read_line(&mut input).expect("Failed to read line");
-
-        let input = input.trim();
-        let mut parts = input.split_whitespace();
-
-        let flag = parts.next();
-        let arg = parts.next();
-        let extra = parts.next();
-
-        match flag {
-            Some("-f") => {
-                if let Some(query) = arg {
-                    search_package(query);
-                }
-                else {
-                    println!("Usage: -f <search_term>");
-                }
+    match flag.as_deref() {
+        Some("-f") => {
+            if let Some(query) = arg.as_deref() {
+                search_package(query);
             }
-            Some("-i") => {
-                if let Some(package) = arg {
-                    install_package(package, extra);
-                }
-                else {
-                    println!("Usage: -i <package_name> [/l<path>]");
-                }
+            else {
+                println!("Usage: -f <search_term>");
             }
-            Some("-u") => {
-                update_packages(arg, extra);
+        }
+        Some("-i") => {
+            if let Some(package) = arg.as_deref() {
+                install_package(package, extra.as_deref());
             }
-            Some("-c") => {
-                clear_screen();
+            else {
+                println!("Usage: -i <package_name> [/l<path>]");
             }
-            Some("-h") => {
-                print_help();
-            }
-            Some("-q") => {
-                running = false;
-            }
-            Some(_) | None => {
-                println!("Unknown command. Use -h for help.");
-            }
+        }
+        Some("-u") => {
+            update_packages(arg.as_deref(), extra.as_deref());
+        }
+        Some("-c") => {
+            clear_screen();
+        }
+        Some("-h") => {
+            print_help();
+        }
+        Some(_) | None => {
+            println!("Unknown command. Use -h for help.");
         }
     }
 }
@@ -57,7 +43,7 @@ fn main() {
 fn get_location(token: Option<&str>) -> Option<String> {
     if let Some(t) = token {
         if t == "/l" {
-            let current = std::env::current_dir().expect("Failed to get current directory");
+            let current = env::current_dir().expect("Failed to get current directory");
             return Some(current.to_string_lossy().into_owned());
         }
         else if t.starts_with("/l") {
@@ -194,15 +180,17 @@ fn clear_screen() {
 
 fn print_help() {
     println!("Welcome to spiv");
-    println!("Commands:");
+    println!("Commands:                      |");
     println!("-f <search_term>               | Search for a package");
     println!("-i <package_name> [/l<path>]   | Install a package");
     println!("-u /a [/l<path>]               | Update all packages");
     println!("-u <package_name> [/l<path>]   | Update a specific package");
-    println!("-u /l                          | Update all in current location");
     println!("-c                             | Clear screen");
     println!("-h                             | Show help");
     println!("-q                             | Quit");
+    println!("/l                             | Choose location to install/update to...");
+    println!("/l only works for MSI installer| Warning");
+    println!("/a                             | Refers to all");
 }
 
 fn command_exists(cmd: &str) -> bool {
