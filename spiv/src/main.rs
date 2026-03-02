@@ -26,7 +26,7 @@ fn main() {
             find_package_manager()
         }
 
-        #[cfg(!(target_os = "linux"))] {
+        #[cfg(not(target_os = "linux"))] {
             PkgMan::Unknown
         }
     };
