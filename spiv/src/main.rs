@@ -1,5 +1,6 @@
 use std::env;
 use std::process::Command;
+use colored::{control, Colorize};
 
 fn main() {
     let mut args = env::args().skip(1);
@@ -8,13 +9,15 @@ fn main() {
     let arg = args.next();
     let extra = args.next();
 
+    control::set_virtual_terminal(true).unwrap();
+
     match flag.as_deref() {
         Some("-f") => {
             if let Some(query) = arg.as_deref() {
                 search_package(query);
             }
             else {
-                println!("Usage: -f <search_term>");
+                println!("{}", "Usage: -f <search_term>".yellow());
             }
         }
         Some("-i") => {
@@ -22,7 +25,7 @@ fn main() {
                 install_package(package, extra.as_deref());
             }
             else {
-                println!("Usage: -i <package_name> [/l<path>]");
+                println!("{}", "Usage: -i <package_name> [/l<path>]".yellow());
             }
         }
         Some("-u") => {
@@ -33,7 +36,7 @@ fn main() {
                 remove_package(package);
             }
             else {
-                println!("Usage: -r <package_name>");
+                println!("{}", "Usage: -r <package_name>".yellow());
             }
         }
         Some("-c") => {
@@ -43,7 +46,7 @@ fn main() {
             print_help();
         }
         Some(_) | None => {
-            println!("Unknown command. Use -h for help.");
+            println!("{}", "Unknown command. Use -h for help.".yellow());
         }
     }
 }
@@ -207,19 +210,19 @@ fn clear_screen() {
 }
 
 fn print_help() {
-    println!("Welcome to spiv");
+    println!("{}", "Welcome to spiv".blue());
     println!("Commands:                      |");
-    println!("-f <search_term>               | Search for a package");
-    println!("-i <package_name> [/l<path>]   | Install a package");
-    println!("-u /a [/l<path>]               | Update all packages");
-    println!("-u <package_name> [/l<path>]   | Update a specific package");
-    println!("-r <package_name>              | Removes a specific package");
-    println!("-c                             | Clear screen");
-    println!("-h                             | Show help");
-    println!("-q                             | Quit");
-    println!("/l                             | Choose location to install/update to...");
-    println!("/l only works for MSI installer| Warning");
-    println!("/a                             | Refers to all");
+    println!("{} {}", "-f <search_term>               |", " Search for a package".yellow());
+    println!("{} {}", "-i <package_name> [/l<path>]   |", " Install a package".yellow());
+    println!("{} {}", "-u /a [/l<path>]               |", " Update all packages".yellow());
+    println!("{} {}", "-u <package_name> [/l<path>]   |", " Update a specific package".yellow());
+    println!("{} {}", "-r <package_name>              |", " Removes a specific package".yellow());
+    println!("{} {}", "-c                             |", " Clear screen".yellow());
+    println!("{} {}", "-h                             |", " Show help".yellow());
+    println!("{} {}", "-q                             |", " Quit".yellow());
+    println!("{} {}", "/l                             |", " Choose location to install/update to...".yellow());
+    println!("{} {}", "/l only works for MSI installer|", " Warning".red());
+    println!("{} {}", "/a                             |", " Refers to all".yellow());
 }
 
 fn command_exists(cmd: &str) -> bool {

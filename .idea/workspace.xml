@@ -13,6 +13,8 @@
   <component name="ChangeListManager">
     <list default="true" id="5fc1739b-cb08-4861-9b8f-6742cbe95bc3" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spiv/Cargo.lock" beforeDir="false" afterPath="$PROJECT_DIR$/spiv/Cargo.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spiv/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/spiv/Cargo.toml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/spiv/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/spiv/src/main.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -116,6 +118,8 @@
       <workItem from="1772277513598" duration="1980000" />
       <workItem from="1772352185798" duration="226000" />
       <workItem from="1772424888962" duration="411000" />
+      <workItem from="1772447296154" duration="22000" />
+      <workItem from="1772450004664" duration="1036000" />
     </task>
     <servers />
   </component>
