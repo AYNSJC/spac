@@ -9,7 +9,7 @@ fn main() {
     let arg = args.next();
     let extra = args.next();
 
-    if cfg!(target_os = "windows") {
+    #[cfg(target_os = "windows")] {
         control::set_virtual_terminal(true).unwrap();
     }
 
