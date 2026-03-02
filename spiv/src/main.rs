@@ -25,7 +25,7 @@ fn main() {
     let pkgman = PkgMan::Unknown;
 
     #[cfg(target_os = "linux")] {
-        pkgman = find_package_manager();
+        let pkgman = find_package_manager();
     }
 
     match flag.as_deref() {
