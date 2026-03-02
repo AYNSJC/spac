@@ -79,7 +79,7 @@ fn search_package(query: &str) {
             Command::new("pacman").args(["-Ss", query]).status().expect("failed to execute pacman");
         }
         else {
-            println!("No supported package manager found.");
+            println!("{}", "No supported package manager found.".red().bold());
         }
     }
 }
@@ -106,7 +106,7 @@ fn install_package(package: &str, extra: Option<&str>) {
             Command::new("sudo").args(["pacman", "-S", "--noconfirm", package]).status().expect("failed to execute pacman");
         }
         else {
-            println!("No supported package manager found.");
+            println!("{}", "No supported package manager found.".red().bold());
         }
     }
 }
@@ -126,7 +126,7 @@ fn remove_package(package: &str) {
             Command::new("sudo").args(["pacman", "-R", "--noconfirm", package]).status().expect("failed to execute pacman");
         }
         else {
-            println!("No supported package manager found.");
+            println!("{}", "No supported package manager found.".red().bold());
         }
     }
 }
@@ -176,12 +176,12 @@ fn update_packages(arg: Option<&str>, extra: Option<&str>) {
                     Command::new("sudo").args(["pacman", "-S", pkg, "--noconfirm"]).status().expect("failed to upgrade pacman package");
                 }
                 else {
-                    println!("No supported package manager found.");
+                    println!("{}", "No supported package manager found.".red().bold());
                 }
             }
         }
         None => {
-            println!("Usage: -u /a [/l<path>]  (all)  OR  -u <package> [/l<path>]");
+            println!("{}", "Usage: -u /a [/l<path>]  (all)  OR  -u <package> [/l<path>]".yellow());
         }
     }
 }
@@ -210,7 +210,7 @@ fn clear_screen() {
 }
 
 fn print_help() {
-    println!("{}", "Welcome to spiv".blue());
+    println!("{}", "Welcome to spiv".blue().bold());
     println!("Commands:                      |");
     println!("{} {}", "-f <search_term>               |", " Search for a package".yellow());
     println!("{} {}", "-i <package_name> [/l<path>]   |", " Install a package".yellow());
@@ -221,7 +221,7 @@ fn print_help() {
     println!("{} {}", "-h                             |", " Show help".yellow());
     println!("{} {}", "-q                             |", " Quit".yellow());
     println!("{} {}", "/l                             |", " Choose location to install/update to...".yellow());
-    println!("{} {}", "/l only works for MSI installer|", " Warning".red());
+    println!("{} {}", "/l only works for MSI installer|", " Warning".red().bold());
     println!("{} {}", "/a                             |", " Refers to all".yellow());
 }
 
@@ -241,6 +241,6 @@ fn update_all_linux() {
         Command::new("sudo").args(["pacman", "-Syu", "--noconfirm"]).status().expect("failed to execute pacman");
     }
     else {
-        println!("No supported package manager found.");
+        println!("{}", "No supported package manager found.".red().bold());
     }
 }
