@@ -22,7 +22,11 @@ fn main() {
         control::set_virtual_terminal(true).unwrap();
     }
 
-    let pkgman = find_package_manager();
+    let pkgman = PkgMan::Unknown;
+
+    #[cfg(target_os = "linux")] {
+        pkgman = find_package_manager();
+    }
 
     match flag.as_deref() {
         Some("-f") => {
