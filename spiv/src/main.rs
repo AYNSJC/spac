@@ -17,16 +17,19 @@ fn main() {
     let arg = args.next();
     let extra = args.next();
 
-    #[cfg(target_os = "windows")]
-    {
+    #[cfg(target_os = "windows")] {
         control::set_virtual_terminal(true).unwrap();
     }
 
-    let pkgman = PkgMan::Unknown;
+    let pkgman = {
+        #[cfg(target_os = "linux")]{
+            find_package_manager()
+        }
 
-    #[cfg(target_os = "linux")] {
-        let pkgman = find_package_manager();
-    }
+        #[cfg(!(target_os = "linux"))] {
+            PkgMan::Unknown
+        }
+    };
 
     match flag.as_deref() {
         Some("-f") => {
