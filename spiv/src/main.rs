@@ -65,6 +65,8 @@ fn get_location(token: Option<&str>) -> Option<String> {
 }
 
 fn search_package(query: &str) {
+    println!("Searching {}", query.yellow().bold());
+
     if cfg!(target_os = "windows") {
         Command::new("winget").args(["search", query]).status().expect("failed to execute winget");
     }
@@ -85,6 +87,8 @@ fn search_package(query: &str) {
 }
 
 fn install_package(package: &str, extra: Option<&str>) {
+    println!("Installing {}", package.yellow().bold());
+
     let location = get_location(extra);
 
     if cfg!(target_os = "windows") {
@@ -112,6 +116,8 @@ fn install_package(package: &str, extra: Option<&str>) {
 }
 
 fn remove_package(package: &str) {
+    println!("Removing {}", package.yellow().bold());
+
     if cfg!(target_os = "windows") {
         Command::new("winget").args(["uninstall", package]).status().expect("failed to execute winget");
     }
@@ -145,6 +151,8 @@ fn update_packages(arg: Option<&str>, extra: Option<&str>) {
     match arg {
         Some("/a") => {
             if cfg!(target_os = "windows") {
+                println!("{} {} {} {}", "Updating", "package manager".yellow().bold(), "and", "system files".yellow().bold());
+
                 if let Some(loc) = &location {
                     Command::new("winget").args(["upgrade", "--all", "--location", loc]).status().expect("failed to execute winget");
                 }
@@ -157,6 +165,8 @@ fn update_packages(arg: Option<&str>, extra: Option<&str>) {
             }
         }
         Some(pkg) => {
+            println!("Updating {}", pkg.yellow().bold());
+
             if cfg!(target_os = "windows") {
                 if let Some(loc) = &location {
                     Command::new("winget").args(["upgrade", pkg, "--location", loc]).status().expect("failed to execute winget");
@@ -188,6 +198,8 @@ fn update_packages(arg: Option<&str>, extra: Option<&str>) {
 
 fn update_all(location: Option<&str>) {
     if cfg!(target_os = "windows") {
+        println!("{} {} {} {}", "Updating", "package manager".yellow().bold(), "and", "system files".yellow().bold());
+
         if let Some(loc) = location {
             Command::new("winget").args(["upgrade", "--all", "--location", loc]).status().expect("failed to execute winget");
         }
@@ -212,24 +224,28 @@ fn clear_screen() {
 fn print_help() {
     println!("{}", "Welcome to spiv".blue().bold());
     println!("Commands:                      |");
-    println!("{} {}", "-f <search_term>               |", " Search for a package".yellow());
-    println!("{} {}", "-i <package_name> [/l<path>]   |", " Install a package".yellow());
-    println!("{} {}", "-u /a [/l<path>]               |", " Update all packages".yellow());
-    println!("{} {}", "-u <package_name> [/l<path>]   |", " Update a specific package".yellow());
-    println!("{} {}", "-r <package_name>              |", " Removes a specific package".yellow());
-    println!("{} {}", "-c                             |", " Clear screen".yellow());
-    println!("{} {}", "-h                             |", " Show help".yellow());
-    println!("{} {}", "-q                             |", " Quit".yellow());
-    println!("{} {}", "/l                             |", " Choose location to install/update to...".yellow());
-    println!("{} {}", "/l only works for MSI installer|", " Warning".red().bold());
-    println!("{} {}", "/a                             |", " Refers to all".yellow());
+    println!("-f <search_term>               |{}", " Search for a package".yellow());
+    println!("-i <package_name> [/l<path>]   |{}", " Install a package".yellow());
+    println!("-u /a [/l<path>]               |{}", " Update all packages".yellow());
+    println!("-u <package_name> [/l<path>]   |{}", " Update a specific package".yellow());
+    println!("-r <package_name>              |{}", " Removes a specific package".yellow());
+    println!("-c                             |{}", " Clear screen".yellow());
+    println!("-h                             |{}", " Show help".yellow());
+    println!("-q                             |{}", " Quit".yellow());
+    println!("/l                             |{}", " Choose location to install/update to...".yellow());
+    println!("/l only works for MSI installer|{}", " Warning".red().bold());
+    println!("/a                             |{}", " Refers to all".yellow());
 }
 
 fn command_exists(cmd: &str) -> bool {
+    println!("Checking package manager {}", cmd.yellow().bold());
+
     Command::new("which").arg(cmd).output().map(|o| o.status.success()).unwrap_or(false)
 }
 
 fn update_all_linux() {
+    println!("{} {} {} {}", "Updating", "package manager".yellow().bold(), "and", "system files".yellow().bold());
+
     if command_exists("apt") {
         Command::new("sudo").args(["apt", "update"]).status().expect("failed to update apt");
         Command::new("sudo").args(["apt", "upgrade", "-y"]).status().expect("failed to upgrade apt");
