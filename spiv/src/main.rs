@@ -28,6 +28,14 @@ fn main() {
         Some("-u") => {
             update_packages(arg.as_deref(), extra.as_deref());
         }
+        Some("-r") => {
+            if let Some(package) = arg.as_deref() {
+                remove_package(package);
+            }
+            else {
+                println!("Usage: -r <package_name>");
+            }
+        }
         Some("-c") => {
             clear_screen();
         }
@@ -93,6 +101,26 @@ fn install_package(package: &str, extra: Option<&str>) {
         }
         else if command_exists("pacman") {
             Command::new("sudo").args(["pacman", "-S", "--noconfirm", package]).status().expect("failed to execute pacman");
+        }
+        else {
+            println!("No supported package manager found.");
+        }
+    }
+}
+
+fn remove_package(package: &str) {
+    if cfg!(target_os = "windows") {
+        Command::new("winget").args(["uninstall", package]).status().expect("failed to execute winget");
+    }
+    else if cfg!(target_os = "linux") {
+        if command_exists("apt") {
+            Command::new("sudo").args(["apt", "uninstall", "-y", package]).status().expect("failed to execute apt");
+        }
+        else if command_exists("dnf") {
+            Command::new("sudo").args(["dnf", "uninstall", "-y", package]).status().expect("failed to execute dnf");
+        }
+        else if command_exists("pacman") {
+            Command::new("sudo").args(["pacman", "-R", "--noconfirm", package]).status().expect("failed to execute pacman");
         }
         else {
             println!("No supported package manager found.");
@@ -185,6 +213,7 @@ fn print_help() {
     println!("-i <package_name> [/l<path>]   | Install a package");
     println!("-u /a [/l<path>]               | Update all packages");
     println!("-u <package_name> [/l<path>]   | Update a specific package");
+    println!("-r <package_name>              | Removes a specific package");
     println!("-c                             | Clear screen");
     println!("-h                             | Show help");
     println!("-q                             | Quit");
