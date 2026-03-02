@@ -9,7 +9,9 @@ fn main() {
     let arg = args.next();
     let extra = args.next();
 
-    control::set_virtual_terminal(true).unwrap();
+    if cfg!(target_os = "windows") {
+        control::set_virtual_terminal(true).unwrap();
+    }
 
     match flag.as_deref() {
         Some("-f") => {
@@ -90,6 +92,10 @@ fn install_package(package: &str, extra: Option<&str>) {
     println!("Installing {}", package.yellow().bold());
 
     let location = get_location(extra);
+
+    if cfg!(target_os = "linux") && location.is_some() {
+        println!("{} {}", "Warning: ".red().bold(), "Location flag is not supported on Linux package managers.".red().italic());
+    }
 
     if cfg!(target_os = "windows") {
         if let Some(loc) = &location {
@@ -240,7 +246,7 @@ fn print_help() {
 fn command_exists(cmd: &str) -> bool {
     println!("Checking package manager {}", cmd.yellow().bold());
 
-    Command::new("which").arg(cmd).output().map(|o| o.status.success()).unwrap_or(false)
+    Command::new(cmd).arg("--version").output().is_ok()
 }
 
 fn update_all_linux() {
