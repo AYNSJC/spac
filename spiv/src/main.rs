@@ -69,10 +69,11 @@ fn get_location(token: Option<&str>) -> Option<String> {
 fn search_package(query: &str) {
     println!("Searching {}", query.yellow().bold());
 
-    if cfg!(target_os = "windows") {
+    #[cfg(target_os = "windows")] {
         Command::new("winget").args(["search", query]).status().expect("failed to execute winget");
     }
-    else if cfg!(target_os = "linux") {
+
+    #[cfg(target_os = "linux")] {
         if command_exists("apt") {
             Command::new("apt").args(["search", query]).status().expect("failed to execute apt");
         }
@@ -93,11 +94,13 @@ fn install_package(package: &str, extra: Option<&str>) {
 
     let location = get_location(extra);
 
-    if cfg!(target_os = "linux") && location.is_some() {
-        println!("{} {}", "Warning: ".red().bold(), "Location flag is not supported on Linux package managers.".red().italic());
+    #[cfg(target_os = "linux")] {
+        if location.is_some() {
+            println!("{} {}", "Warning: ".red().bold(), "Location flag is not supported on Linux package managers.".red().italic());
+        }
     }
 
-    if cfg!(target_os = "windows") {
+    #[cfg(target_os = "windows")] {
         if let Some(loc) = &location {
             Command::new("winget").args(["install", package, "--location", loc]).status().expect("failed to execute winget");
         }
@@ -105,7 +108,8 @@ fn install_package(package: &str, extra: Option<&str>) {
             Command::new("winget").args(["install", package]).status().expect("failed to execute winget");
         }
     }
-    else if cfg!(target_os = "linux") {
+
+    #[cfg(target_os = "linux")] {
         if command_exists("apt") {
             Command::new("sudo").args(["apt", "install", "-y", package]).status().expect("failed to execute apt");
         }
@@ -124,10 +128,11 @@ fn install_package(package: &str, extra: Option<&str>) {
 fn remove_package(package: &str) {
     println!("Removing {}", package.yellow().bold());
 
-    if cfg!(target_os = "windows") {
+    #[cfg(target_os = "windows")] {
         Command::new("winget").args(["uninstall", package]).status().expect("failed to execute winget");
     }
-    else if cfg!(target_os = "linux") {
+
+    #[cfg(target_os = "linux")] {
         if command_exists("apt") {
             Command::new("sudo").args(["apt", "uninstall", "-y", package]).status().expect("failed to execute apt");
         }
@@ -156,7 +161,7 @@ fn update_packages(arg: Option<&str>, extra: Option<&str>) {
 
     match arg {
         Some("/a") => {
-            if cfg!(target_os = "windows") {
+            #[cfg(target_os = "windows")] {
                 println!("{} {} {} {}", "Updating", "package manager".yellow().bold(), "and", "system files".yellow().bold());
 
                 if let Some(loc) = &location {
@@ -166,14 +171,15 @@ fn update_packages(arg: Option<&str>, extra: Option<&str>) {
                     Command::new("winget").args(["upgrade", "--all"]).status().expect("failed to execute winget");
                 }
             }
-            else if cfg!(target_os = "linux") {
+
+            #[cfg(target_os = "linux")] {
                 update_all_linux();
             }
         }
         Some(pkg) => {
             println!("Updating {}", pkg.yellow().bold());
 
-            if cfg!(target_os = "windows") {
+            #[cfg(target_os = "windows")] {
                 if let Some(loc) = &location {
                     Command::new("winget").args(["upgrade", pkg, "--location", loc]).status().expect("failed to execute winget");
                 }
@@ -181,7 +187,7 @@ fn update_packages(arg: Option<&str>, extra: Option<&str>) {
                     Command::new("winget").args(["upgrade", pkg]).status().expect("failed to execute winget");
                 }
             }
-            else if cfg!(target_os = "linux") {
+            #[cfg(target_os = "linux")] {
                 if command_exists("apt") {
                     Command::new("sudo").args(["apt", "install", "--only-upgrade", pkg]).status().expect("failed to upgrade apt package");
                 }
@@ -203,7 +209,7 @@ fn update_packages(arg: Option<&str>, extra: Option<&str>) {
 }
 
 fn update_all(location: Option<&str>) {
-    if cfg!(target_os = "windows") {
+    #[cfg(target_os = "windows")] {
         println!("{} {} {} {}", "Updating", "package manager".yellow().bold(), "and", "system files".yellow().bold());
 
         if let Some(loc) = location {
@@ -213,16 +219,18 @@ fn update_all(location: Option<&str>) {
             Command::new("winget").args(["upgrade", "--all"]).status().expect("failed to execute winget");
         }
     }
-    else if cfg!(target_os = "linux") {
+
+    #[cfg(target_os = "linux")] {
         update_all_linux();
     }
 }
 
 fn clear_screen() {
-    if cfg!(target_os = "windows") {
+    #[cfg(target_os = "windows")] {
         Command::new("cmd").args(["/C", "cls"]).status().unwrap();
     }
-    else {
+
+    #[cfg(target_os = "linux")] {
         Command::new("clear").status().unwrap();
     }
 }
