@@ -246,14 +246,17 @@ fn clear_screen() {
 
 fn print_help() {
     println!("{}", "Welcome to spiv".blue().bold());
-    println!("-f <search_term>");
-    println!("-i <package_name>");
-    println!("-u /a");
-    println!("-u <package_name>");
-    println!("-r <package_name>");
-    println!("-c");
-    println!("-h");
-}
+    println!("Commands:                        |");
+    println!("-f <search_term>                 |{}", " Search for a package".yellow());
+    println!("-i <package_name> [/l<path>]     |{}", " Install a package".yellow());
+    println!("-u /a [/l<path>]                 |{}", " Update all packages".yellow());
+    println!("-u <package_name> [/l<path>]     |{}", " Update a specific package".yellow());
+    println!("-r <package_name>                |{}", " Removes a specific package".yellow());
+    println!("-c                               |{}", " Clear screen".yellow());
+    println!("-h                               |{}", " Show help".yellow());
+    println!("/l                               |{}", " Choose location (Windows ONLY)...".yellow());
+    println!("/l only works for MSI installer  |{}", " Warning".red().bold());
+    println!("/a                               |{}", " Refers to all".yellow()); }
 
 fn get_location(token: Option<&str>) -> Option<String> {
     if let Some(t) = token {
