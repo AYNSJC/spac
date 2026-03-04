@@ -1,5 +1,6 @@
 use std::env;
-use std::process::Command;
+use std::process::{Command, Stdio};
+use std::io::{BufRead, BufReader};
 use colored::{control, Colorize};
 
 #[derive(Clone, Copy, PartialEq)]
@@ -124,7 +125,34 @@ fn search_package(query: &str, pkgman: PkgMan) {
             Command::new("dnf").args(["search", query]).status().expect("failed to execute dnf");
         }
         else if pkgman == PkgMan::Pacman {
-            Command::new("pacman").args(["-Ss", query]).status().expect("failed to execute pacman");
+            let mut raw = Command::new("pacman").args(["-Ss", query]).stdout(Stdio::piped()).spawn().expect("failed to execute pacman");
+
+            let stdout = raw.stdout.take().expect("failed to take stdout");
+            let reader = BufReader::new(stdout);
+
+            for line in reader.lines() {
+                let output = line.expect("failed to read line");
+
+                if output.starts_with("core/") {
+                    let cleaned = output.replace("core/", "");
+                    println!("{}", cleaned);
+                }
+                else if output.starts_with("extra/") {
+                    let cleaned = output.replace("extra/", "");
+                    println!("{}", cleaned);
+                }
+                else if output.starts_with("community/") {
+                    let cleaned = output.replace("community/", "");
+                    println!("{}", cleaned);
+                }
+                else if output.starts_with("    ") {
+                    let cleaned = output.replace("core/", "");
+                    println!("{}", cleaned);
+                }
+                else {
+                    println!("{}", output);
+                }
+            }
         }
         else {
             println!("{}", "No supported package manager found.".red().bold());
@@ -262,8 +290,10 @@ fn print_help() {
     println!("-u /a [/l<path>]                 |{}", " Update all packages".yellow());
     println!("-u <package_name> [/l<path>]     |{}", " Update a specific package".yellow());
     println!("-r <package_name>                |{}", " Removes a specific package".yellow());
+    println!("-w                               |{}", " Tells the recognised package manager".yellow());
     println!("-c                               |{}", " Clear screen".yellow());
     println!("-h                               |{}", " Show help".yellow());
+    println!("/q                               |{}", " Cleaner UI".yellow());
     println!("/l                               |{}", " Choose location (Windows ONLY)...".yellow());
     println!("/l only works for MSI installer  |{}", " Warning".red().bold());
     println!("/a                               |{}", " Refers to all".yellow()); }
