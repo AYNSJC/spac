@@ -67,6 +67,16 @@ fn main() {
             clear_screen();
         }
 
+        Some("-w") => {
+            #[cfg(target_os = "linux")]{
+                get_package_manager(pkgman);
+            }
+
+            #[cfg(target_os = "windows")]{
+                println!("{}", "winget".yellow());
+            }
+        }
+
         Some("-h") => {
             print_help();
         }
@@ -163,7 +173,7 @@ fn remove_package(package: &str, pkgman: PkgMan) {
     #[cfg(target_os = "linux")]
     {
         if pkgman == PkgMan::Apt {
-            Command::new("sudo").args(["apt", "uninstall", "-y", package]).status().expect("failed to execute apt");
+            Command::new("sudo").args(["apt", "remove", "-y", package]).status().expect("failed to execute apt");
         }
         else if pkgman == PkgMan::Dnf {
             Command::new("sudo").args(["dnf", "remove", "-y", package]).status().expect("failed to execute dnf");
@@ -215,7 +225,7 @@ fn update_packages(arg: Option<&str>, _extra: Option<&str>, pkgman: PkgMan) {
 }
 
 fn update_all_linux(pkgman: PkgMan) {
-    println!("{} {} {} {}", "Updating", "package manager".yellow().bold(), "and", "system files".yellow().bold());
+    println!("{} {} {} {}", "Updating", "package manager".yellow().bold(), "and", "packages".yellow().bold());
 
     if pkgman == PkgMan::Apt {
         Command::new("sudo").args(["apt", "update"]).status().expect("failed to update apt");
@@ -265,4 +275,19 @@ fn get_location(token: Option<&str>) -> Option<String> {
         }
     }
     None
+}
+
+fn get_package_manager(pkgman: PkgMan) {
+    if pkgman == PkgMan::Apt {
+        println!("{}", "apt recognised".yellow());
+    }
+    else if pkgman == PkgMan::Dnf {
+        println!("{}", "dnf recognised".yellow());
+    }
+    else if pkgman == PkgMan::Pacman {
+        println!("{}", "pacman recognised".yellow());
+    }
+    else {
+        println!("{}", "Unknown package manager".red().bold());
+    }
 }
