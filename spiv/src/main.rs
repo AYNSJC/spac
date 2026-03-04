@@ -35,7 +35,7 @@ fn main() {
     match flag.as_deref() {
         Some("-f") => {
             if let Some(query) = arg.as_deref() {
-                search_package(query, pkgman);
+                search_package(query, extra.as_deref(), pkgman);
             }
             else {
                 println!("{}", "Usage: -f <search_term>".yellow());
@@ -108,7 +108,7 @@ fn command_exists(cmd: &str) -> bool {
     Command::new(cmd).arg("--version").output().is_ok()
 }
 
-fn search_package(query: &str, pkgman: PkgMan) {
+fn search_package(query: &str, extra: Option<&str>, pkgman: PkgMan) {
     println!("Searching {}", query.yellow().bold());
 
     #[cfg(target_os = "windows")]
@@ -133,21 +133,23 @@ fn search_package(query: &str, pkgman: PkgMan) {
             for line in reader.lines() {
                 let output = line.expect("failed to read line");
 
-                if output.starts_with("core/") {
-                    let cleaned = output.replace("core/", "");
-                    println!("{}", cleaned);
-                }
-                else if output.starts_with("extra/") {
-                    let cleaned = output.replace("extra/", "");
-                    println!("{}", cleaned);
-                }
-                else if output.starts_with("community/") {
-                    let cleaned = output.replace("community/", "");
-                    println!("{}", cleaned);
-                }
-                else if output.starts_with("    ") {
-                    let cleaned = output.replace("core/", "");
-                    println!("{}", cleaned);
+                if let Some("/c") = extra {
+                    if output.starts_with("core/") {
+                        let cleaned = output.replace("core/", "");
+                        println!("{}", cleaned.bold());
+                    } else if output.starts_with("extra/") {
+                        let cleaned = output.replace("extra/", "");
+                        println!("{}", cleaned.bold());
+                    } else if output.starts_with("community/") {
+                        let cleaned = output.replace("community/", "");
+                        println!("{}", cleaned.bold());
+                    } else if output.starts_with("    ") {
+                        let cleaned = output.replace("    ", ">  ");
+                        println!("{}", cleaned);
+                        println!();
+                    } else {
+                        println!("{}", output);
+                    }
                 }
                 else {
                     println!("{}", output);
@@ -293,7 +295,7 @@ fn print_help() {
     println!("-w                               |{}", " Tells the recognised package manager".yellow());
     println!("-c                               |{}", " Clear screen".yellow());
     println!("-h                               |{}", " Show help".yellow());
-    println!("/q                               |{}", " Cleaner UI".yellow());
+    println!("/c                               |{}", " Cleaner UI".yellow());
     println!("/l                               |{}", " Choose location (Windows ONLY)...".yellow());
     println!("/l only works for MSI installer  |{}", " Warning".red().bold());
     println!("/a                               |{}", " Refers to all".yellow()); }
