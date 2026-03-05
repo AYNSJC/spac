@@ -25,7 +25,7 @@
 Clone the repository and build with Cargo:
 
 ```bash
-git clone https://github.com/yourname/spiv
+git clone https://github.com/AYNSJC/spiv
 cd spiv
 cargo build --release
 ```
