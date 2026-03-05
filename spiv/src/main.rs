@@ -132,20 +132,24 @@ fn search_package(query: &str, extra: Option<&str>, pkgman: PkgMan) {
 
             for line in reader.lines() {
                 let output = line.expect("failed to read line");
+                let mut index: i16 = 0;
 
                 if let Some("/c") = extra {
                     if output.starts_with("core/") {
                         let cleaned = output.replace("core/", "");
-                        println!("{}", cleaned.bold());
+                        println!("{index}. {}", cleaned.bold());
+                        index += 1;
                     } else if output.starts_with("extra/") {
                         let cleaned = output.replace("extra/", "");
-                        println!("{}", cleaned.bold());
+                        println!("{index}. {}", cleaned.bold());
+                        index += 1;
                     } else if output.starts_with("community/") {
                         let cleaned = output.replace("community/", "");
-                        println!("{}", cleaned.bold());
+                        println!("{index}. {}", cleaned.bold());
+                        index += 1;
                     } else if output.starts_with("    ") {
                         let cleaned = output.replace("    ", ">  ");
-                        println!("{}", cleaned);
+                        println!("{}", cleaned.italic());
                         println!();
                     } else {
                         println!("{}", output);
