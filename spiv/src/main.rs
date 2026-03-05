@@ -82,6 +82,10 @@ fn main() {
             print_help();
         }
 
+        None => {
+            println!("{} {}", "spiv version:", env!("CARGO_PKG_VERSION").bold());
+        }
+
         Some(_) | None => {
             println!("{}", "Unknown command. Use -h for help.".yellow());
         }
