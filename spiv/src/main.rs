@@ -130,9 +130,10 @@ fn search_package(query: &str, extra: Option<&str>, pkgman: PkgMan) {
             let stdout = raw.stdout.take().expect("failed to take stdout");
             let reader = BufReader::new(stdout);
 
+            let mut index: i16 = 0;
+
             for line in reader.lines() {
                 let output = line.expect("failed to read line");
-                let mut index: i16 = 0;
 
                 if let Some("/c") = extra {
                     if output.starts_with("core/") {
