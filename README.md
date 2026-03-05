@@ -115,4 +115,4 @@ On startup, `spiv` detects the available package manager by checking for `apt`, 
 
 ## License
 
-MIT
+GNU General Public License v3.0
