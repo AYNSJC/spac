@@ -71,7 +71,7 @@ fn main() {
         Some("-w") => {
             #[cfg(target_os = "linux")]{
                 get_package_manager(pkgman);
-                print!("/n");
+                print!("\n");
             }
 
             #[cfg(target_os = "windows")]{
@@ -87,9 +87,10 @@ fn main() {
             println!("{} {}", "spiv version:", env!("CARGO_PKG_VERSION").bold());
             print!("Package manager: ");
             get_package_manager(pkgman);
+            print!("\n");
         }
 
-        Some(_) | None => {
+        Some(_) => {
             println!("{}", "Unknown command. Use -h for help.".yellow());
         }
     }
@@ -323,13 +324,13 @@ fn get_location(token: Option<&str>) -> Option<String> {
 
 fn get_package_manager(pkgman: PkgMan) {
     if pkgman == PkgMan::Apt {
-        print!("{}", "apt recognised".yellow());
+        print!("{}", "apt recognised".yellow().bold());
     }
     else if pkgman == PkgMan::Dnf {
-        print!("{}", "dnf recognised".yellow());
+        print!("{}", "dnf recognised".yellow().bold());
     }
     else if pkgman == PkgMan::Pacman {
-        print!("{}", "pacman recognised".yellow());
+        print!("{}", "pacman recognised".yellow().bold());
     }
     else {
         print!("{}", "Unknown package manager".red().bold());
